@@ -15,15 +15,12 @@ import sqlite3
 usernames = sys.argv
 tweets_to_db = []
 
-
+    # SAVING TO SQL DATABASE
 def save_tweets_to_db(to_save, user):
     conn = sqlite3.connect('tweets_database.db')
     c = conn.cursor()
-
-        # parent table
     c.execute("CREATE TABLE IF NOT EXISTS usernames (username TEXT, UNIQUE (username))")
     c.execute("INSERT OR IGNORE INTO usernames(username) VALUES (?)", [user])
-    # child table
     c.execute("""
         CREATE TABLE IF NOT EXISTS tweets (
         tweet_id integer PRIMARY KEY,
@@ -31,30 +28,21 @@ def save_tweets_to_db(to_save, user):
         date_tweet TEXT,
         text_tweet TEXT,
         FOREIGN KEY (username) REFERENCES usernames (username)
-        
     )""")
     c.execute("DELETE FROM tweets WHERE username=(?)", [user])
     c.executemany("INSERT INTO tweets(username, date_tweet, text_tweet) VALUES (?, ?, ?)", to_save)
-# UNIQUE (username, date_tweet, text_tweet)
-
-    # possible data types: NULL, INTEGER, REAL (double), TEXT, BLOB (anything)
-
-    # push into database
-    conn.commit()
-
-    # close connection
-    conn.close()
     
-    # for list in to_save:
-    #     for number in list:
-    #         print(number)
+    conn.commit()
+    conn.close()
 
     # DOWNLOADING TWEETS
 def get_tweets(username):
     url_for_user_id = 'https://api.twitter.com/1.1/users/show.json?screen_name=' + username
-    # AUTHENTICATION DATA 
+    
+    # AUTHENTICATION DATA --------------------------------------------------------------------------------
     auth = OAuth1('YOUR-API-KEY', 'YOUR-API-KEY-SECRET', 'YOUR-ACCESS-TOKEN', 'YOUR-ACCESS-TOKEN-SECRET')
-
+    # ----------------------------------------------------------------------------------------------------
+    
     # authentication process
     request_id = requests.get(url_for_user_id, auth=auth)
     user_id = request_id.json().get('id')
@@ -70,7 +58,7 @@ def get_tweets(username):
         time.sleep(1)
         return
 
-    # if entered user exists try to get json response from server
+    # if entered user exists - try to get json response from server
     url_user_tweets = 'https://api.twitter.com/2/users/%s/tweets?tweet.fields=created_at'%user_id
     request_tweets = requests.get(url_user_tweets, auth=auth)
     json_response = request_tweets.json() 
@@ -91,10 +79,8 @@ def get_tweets(username):
     
     print("Downloaded", len(user_tweets), "tweets")
     
-
     tweets_to_db = []
-
-    # printing tweets in the console
+    
     for tweets in user_tweets:
 
         # by default that's how value "created_at" looks 2022-04-25T11:32:39.000Z
@@ -104,7 +90,7 @@ def get_tweets(username):
             # 2022-04-25T11:32:39.000Z -> 2022-04-25 11:32:39 ->  2022-04-25 13:32:39
         tweet_text = tweets.get('text') 
         tweets_to_db.append([username, time_created, tweet_text])
-        #print(time_created, "|", tweet_text)
+        #print(time_created, "|", tweet_text) - print tweets in command line if needed
         
     save_tweets_to_db(tweets_to_db, username)
         
@@ -114,10 +100,3 @@ for username in range(1, len(usernames)):
     print("Trying to get tweets for:", usernames[username], "...")
     get_tweets(usernames[username])
 
-
-
-    #print(to_save)
-    #print(to_save[0][0]) godzina
-    #print(to_save[0][1]) tekst tweeta
-
-#print(tweets_to_db)
