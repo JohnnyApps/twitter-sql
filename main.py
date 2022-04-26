@@ -60,6 +60,9 @@ def get_tweets(username):
     user_id = request_id.json().get('id')
     response_code = request_id.status_code
 
+    if response_code == 401:
+        print("Check your credentials. Remember to put your API keys in the code.")
+        return
 
     # when entered user does not exist - end program
     if user_id is None:
@@ -108,7 +111,7 @@ def get_tweets(username):
 
 
 for username in range(1, len(usernames)):
-    print("Fetching tweets for:", usernames[username])
+    print("Trying to get tweets for:", usernames[username], "...")
     get_tweets(usernames[username])
 
 
