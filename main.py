@@ -1,10 +1,7 @@
-from tokenize import String
-from types import NoneType
 import requests
 from requests_oauthlib import OAuth1
 import sys
-from datetime import datetime
-from datetime import timezone
+from datetime import datetime,timezone
 import time
 import sqlite3
 
